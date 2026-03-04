@@ -1,0 +1,165 @@
+
+
+generator client {
+  provider = "prisma-client"
+  output   = "../prisma/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum DashboardVisibility {
+  PRIVATE
+  TEAM
+  PUBLIC
+}
+
+enum ShareRole {
+  VIEWER
+  EDITOR
+  OWNER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  name          String?
+  image         String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts        Account[]
+  sessions        Session[]
+  dashboards      Dashboard[]         @relation("UserDashboards")
+  invitesAccepted DashboardInvite[]   @relation("UserAcceptedInvites")
+  auditLogs       DashboardAuditLog[] @relation("AuditActor")
+  isViewTutorial       Boolean   @default(false)
+  isViewTutorialMobile Boolean   @default(false)
+
+  @@index([createdAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+  createdAt  DateTime @default(now())
+
+  @@id([identifier, token])
+  @@index([expires])
+}
+
+model Dashboard {
+  id                  String              @id @default(cuid())
+  ownerId             String
+  name                String
+  description         String?
+  visibility          DashboardVisibility @default(PRIVATE)
+  isArchived          Boolean             @default(false)
+  canvasData          Json
+  canvasSchemaVersion Int                 @default(1)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  lastOpenedAt        DateTime?
+  presetId            String?             // Nuevo campo para rastrear el preset usado
+
+  owner     User                @relation("UserDashboards", fields: [ownerId], references: [id], onDelete: Cascade)
+  invites   DashboardInvite[]
+  snapshots DashboardSnapshot[]
+  auditLogs DashboardAuditLog[]
+
+  @@index([ownerId, updatedAt])
+  @@index([visibility])
+}
+model DashboardInvite {
+  id           String   @id @default(cuid())
+  dashboardId  String
+  token        String   @unique
+  role         ShareRole @default(VIEWER)
+  email        String? // opcional, si se quiere invitar a un email específico
+  acceptedById String? // userId del que aceptó la invitación
+  acceptedAt   DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime @default(now())
+   maxUses   Int?  // null = ilimitado
+  useCount  Int   @default(0)
+
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  acceptedBy User? @relation("UserAcceptedInvites", fields: [acceptedById], references: [id], onDelete: SetNull)
+
+  @@index([dashboardId])
+  @@index([token])
+}
+model DashboardSnapshot {
+  id            String   @id @default(cuid())
+  dashboardId   String
+  name          String?
+  versionNumber Int
+  canvasData    Json
+  createdAt     DateTime @default(now())
+
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+
+  @@unique([dashboardId, versionNumber])
+  @@index([dashboardId, createdAt])
+}
+
+
+model DashboardAuditLog {
+  id          String   @id @default(cuid())
+  dashboardId String
+  actorUserId String?
+  action      String
+  meta        Json?
+  createdAt   DateTime @default(now())
+
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  actor     User?     @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([dashboardId, createdAt])
+  @@index([actorUserId])
+}

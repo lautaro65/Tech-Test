@@ -1,0 +1,348 @@
+First prompt:
+{"prompt": "ahora aca me gustaria crear mas que nada primero la parte visual estructural de mi pagina web la cual sea parecida utilizando el diseño y estilo de la siguiente imagen", 
+"timestamp,": "13:22:26",
+"model":"github copilot-Claude"}
+2nd prompt:
+{"prompt":"Ahora vamos para mi a trabajar con lo principal lo cual seria el canvas este canvas tendria que tener cuadricula opcional auqneu al principio va a estar siempre activa despues ademas de eso zoom ",
+"timestamp,": "13:25:10",
+"model":"github copilot-Claude"}
+3rd prompt:
+{"prompt":"ahora donde esta el bottom breadcrum en vez de eso tendria que haber los tipo de mouse que podriamos poder elegir entre mouse de selecionar mouse de arrastrarse en la pantalla o un mouse de eliminar elementos "
+,"timestamp,": "13:28:45","model":"github copilot-Claude"}
+4th prompt:
+{
+    "prompt": "ahora dependiendo el mouse que tengamos selecionado funcione de una o otra manera  en el caso selecionar que simplemente nos deje selecionar elementos mas adelante en el caso numero 2 el arrastrar que nos deje agarrar y movernos por el canva o hacer zoom con el scroll wheel y el eliminar que tenga un cursor que simplemente deje eliminar elementos  mas adelante "
+    ,"timestamp,": "13:30:00","model":"github copilot-Claude"
+}
+5th prompt:
+{
+    "prompt":"ahora me gustaria que el selecionar ande que al tocar H se pondra la herramienta hand es decir el mouse estilo arrastrar y, despues para el modo selecionar con la v y  y el de eliminar con la tecla de suprimir ademas de aladir estos comandos hace que cuando se haga hover  aparezca el menu  explicando el comando "
+    ,"timestamp,": "13:35:00","model":"github copilot-Claude"
+}
+6th prompt:
+{
+    "prompt":"ahora quiero que busques un svg que tenga mas forma o que le des mas idea al usuario que sea un asiento y no un simplemente circulo  y arega eso en la sidebar de la izquierda "
+    ,"timestamp,": "13:40:00","model":"github copilot-Claude"
+}
+7th prompt:
+{
+    "prompt":"ahora exactamente lo mismo con una svg de mesa "
+    ,"timestamp,": "13:45:00","model":"github copilot-Claude"
+}
+8th prompt:
+{
+    "prompt":"ahora en la sidebar donde esten los icon de silla filas mesa circular y mesa rectangular/cuadrada hace que con un hover aparezca un mensaje explicando bien lo que es "
+    ,"timestamp,": "13:50:00","model":"github copilot-Claude"
+}
+9th prompt:
+{
+    "prompt":"ahora vamos a hacer funcional lo de la silla para la sidebar asi  poder agregar sillas en el Canva"
+    ,"timestamp,": "13:55:00","model":"github copilot-Claude"
+}
+10th prompt:
+{
+    "prompt":"ahora hace que una silla no se pueda poner una encima de la otra no tiene sentido obviamente "
+    ,"timestamp,": "14:00:00","model":"github copilot-Claude"
+}
+11th prompt:
+{
+    "prompt":"ahora hace que aparezca el mouse de error a demas de eso que salga una react hot toast  que no se puede poner un elemento sobre otro elemento al intentar es decir al hacer click aunque aparezca el mosue que no puede "
+    ,"timestamp,": "14:05:00","model":"github copilot-Claude"
+}
+12th prompt:
+{
+    "prompt":"Ahora Implementa que las sillas se les asigne una etiqueta unica"
+    ,"timestamp,": "14:10:00","model":"github copilot-Claude"
+}
+13th prompt:
+{
+    "prompt":"ahora hace que al poner una silla se deselecione la opcion de poner silla "
+    ,"timestamp,": "14:15:00","model":"github copilot-Claude"
+}
+14th propmt:
+{
+    "prompt":"ahora el menu  de acciones hace que sean mas chicos lo sbuttons mas estilo moderno pero a su vez minimalista y utiliznado lucide icons "
+    ,"timestamp,": "14:20:00","model":"github copilot-Claude"
+}
+15th prompt:
+{
+    "prompt":"ahora hace que al selecionar tambien se pueda mantener y mover la silla "
+    ,"timestamp,": "14:25:00","model":"github copilot-Claude"
+}
+16th prompt:
+{
+    "prompt":"a fin de cuenta lo termina dejando arriba de la silla osea lo que tendria que pasar es si deja la silla arriba de otra que automaticamente  aparezca el mouse y que aparezca el toast com esta pasando ahroa pero ademas de eso automaticamente lo deje solatar pero lo suelte respetando la distancia es decir automaticamente se cambie la posicoon entiendes ? "
+    ,"timestamp,": "14:30:00","model":"github copilot-Claude"
+}
+17th prompt:
+{
+    "prompt":"ahora hace lo tipico que amrca la linea para saber si lo estas poniendo en la misma fila que en la otra silla por darte un ejemplo estoy moviendo una silla y al lado hay otra me aprece la linea cuando estan alineadas  "
+    ,"timestamp,": "14:35:00","model":"github copilot-Claude"
+}
+18th propmt:
+{
+    "prompt":"ahora vamos por parte primero quiero que Copiar/pegar sillas con atajos de teclado. con control v y control c "
+    ,"timestamp,": "14:40:00","model":"github copilot-Claude"
+}
+19th prompt:
+{
+    "prompt":"anda bien pero cuando se haga cel control v que se selecione la silla que se pega nueva entendes "
+    ,"timestamp,": "14:45:00","model":"github copilot-Claude"
+}
+20th prompt:
+{
+    "prompt":"ahora hace que cuando esta el mouse selecionar se pueda selecionar un area  manteniendo click formando un rectangulo para selecionar varias sillas al mismo tiempo  "
+    ,"timestamp,": "14:50:00","model":"github copilot-Claude"
+}
+21th prompt:
+{
+    "prompt":"ahora hace que al seleccionar varias sillas se puedan mover todas juntas manteniendo el area de seleccion y moviendola por el canvas "
+    ,"timestamp,": "14:55:00","model":"github copilot-Claude"
+}
+22th prompt:
+{
+    "prompt":"ahora hace que al seleccionar varias sillas se puedan eliminar todas juntas manteniendo el area de seleccion y apretando la tecla de suprimir "
+    ,"timestamp,": "15:00:00","model":"github copilot-Claude"
+}
+23th prompt:
+{
+    "prompt":"ahora hace que al seleccionar varias sillas se puedan copiar todas juntas manteniendo el area de seleccion y apretando control c y despues pegandolas con control v "
+    ,"timestamp,": "15:05:00","model":"github copilot-Claude"
+}
+24th prompt:
+{
+    "prompt":"hace que al tocar el shift se alinee a la cuadricula aunque se este moviendo libremente o haciendo zoom o lo que sea pero al tocar shift se alinee a la cuadricula "
+    ,"timestamp,": "15:10:00","model":"github copilot-Claude"
+}
+break
+25th prompt:
+{
+    "prompt":"ahora hace que cuando se abre el EntityDropdown tendria que apaercer todo esto 
+1. Información de Identidad (Obligatorio)
+Como el enunciado pide que todos los elementos tengan etiqueta obligatoria, este es el campo más importante:
+
+Label (Etiqueta): Un input de texto para el nombre específico (ej: "A-12").
+3. Posicionamiento PrecisoPara un editor visual, el usuario a veces necesita ajuste fino que el mouse no da:Inputs de Coordenadas ($X$ / $Y$): Para mover el asiento pixel por pixel.Rotación: Útil si el asiento es parte de una mesa o una fila curva.
+ColorPicker
+button para eliminar ese lemento "
+    ,"timestamp,": "15:15:00","model":"github copilot-Claude"
+}
+26th prompt:
+{
+    "prompt":"ahora hace mucho mas lindo todo eso que se muestra nuevo en el entitydropdown es decir el nuevo menu "
+    ,"timestamp,": "15:20:00","model":"github copilot-Claude"
+}
+27th prompt:
+{
+    "prompt":"ahora hace mucho mas lindo todo eso que se muestra nuevo en el entitydropdown es decir el nuevo menu "
+    ,"timestamp,": "15:25:00","model":"github copilot-Claude"
+}
+28th prompt:
+{
+    "prompt":"ahora un ultimo cambio donde dice estadisticas selecionadas pueda modificarse cosas grupales osea si  hay mas de 2 que se pueda abrir un menu donde por ejemplo mover todas 100 x a la derecha y cosas sia si queres primero hacemos soalmente la parte diseño y cvisaul despues hacemos que ande "
+    ,"timestamp,": "15:30:00","model":"github copilot-Claude"
+}
+29th prompt:
+{
+    "prompt":"ahora el menu grupal que se muestra al seleccionar varias sillas que tenga la opcion de mover X grupal y que tenga un input para poner cuanto y al lado un button de play  y asi con todo entendes "
+    ,"timestamp,": "15:35:00","model":"github copilot-Claude"
+}
+30th prompt:
+{
+    "prompt":"ahora hace que ese menu se pueda abrir y cerrar "
+    ,"timestamp,": "15:35:00","model":"github copilot-Claude"
+}
+31th propmt:
+{
+    "prompt":"como harias la manera mas eficiente posible un Deshacer/rehacer acciones (undo/redo)."
+    ,"timestamp,": "15:40:00","model":"github copilot-Claude"
+}
+32th propmt: 
+{
+    "prompt":"Durante el drag, NO modificar el estado global (no llamar a setSeats ni setEntities)."
+    ,"timestamp,": "15:45:00","model":"github copilot-Claude"
+}
+33th prompt:{
+    "prompt":"solucionar errores realcionados a control z y control v por ejemplo comandos como control v o DEL no fucionan es decir no se guarda en el historial cosa que hace que no se pueda deshacer o rehacer esas acciones"
+    ,"timestamp,": "15:50:00","model":"github copilot-Claude"
+}
+34th prompt:
+{
+    "prompt":"ahora lo ultimo que falta lo de limpiar canva que se guarde en el historial es lo ultimo que faltaria "
+    ,"timestamp,": "15:55:00","model":"github copilot-Claude"
+}
+35th prompt: 
+{
+    "prompt":"ahora simplemente hace mas lindo el button de limpiar cache deja el resto comoe sta "
+    ,"timestamp,": "16:00:00","model":"github copilot-Claude"
+}
+36th Propmt: 
+{
+    "prompt":"ahora lo de desacher y rehacer hacelo mucho mas lindo mas simple moderno y minimalista"
+    ,"timestamp,": "16:05:00","model":"github copilot-Claude"
+}
+
+37th propmt:
+{
+    "prompt":"ahora cambios en la sidebar de la derecha haceque no cupe el 100% del heigt ademas de eso hace que sera puntos redondeados ademas de eso que no este pegado a la derecha entendes que sea estilo como si estuviera flotando la sensacion "
+    ,"timestamp,": "16:10:00","model":"github copilot-Claude"
+}
+break
+
+38th propmt:
+{
+    "prompt":"ahora usa Motion para tener animacion de entrada y salida del aside" 
+    ,"timestamp,": "16:15:00","model":"github copilot-Claude"
+}
+39th prompt:
+{
+    "prompt":"mira aca una vez entra esto me gustaria que por ejemplo cunado hay una cunado hay una entidady aparece el selecion actual y el en caso de ser mas de 1 que aparece eso grupal y lo de EntityDropdown y todo eso bueno a esas cosas cuando apraecen animacion por ejemplo sino cuando se abre el EntityDropdown tambien entendes en esos lugare"    ,"timestamp,": "16:15:00","model":"github copilot-Claude"
+}
+40th prompt:
+{    "prompt":"soluciona la animacion de entrada y salida del EntityDropdown y del menu grupal que aparece al seleccionar varias sillas"
+    ,"timestamp,": "16:15:00","model":"github copilot-Claude"
+}
+41th propmt:
+{
+    "prompt":"ahora vamos a amejorar la barra de la izqueirdaquiero que mantenga ese estilo pero que se pueda cerarr pero no estilo flotante como la otra sino que se pueda ahicar y agrandar la manera grande seria  al lado del icono de la silla que diaga silla y asi en cada uno y la resumida sea solmaente icons entendes"
+    ,"timestamp,": "16:20:00","model":"github copilot-Claude"
+}
+42th propmt:
+{
+    "prompt":"esta es la unica pagina que va a tener un footer distinto porque sino no pega el otro footer aca por eso mismo me gustaria que este footer sea algo asi del estilo asi minimalista a mas no poder primero que nada en vez de esta fata que no sirve nada   ● SYSTEM ONLINEZOOM: 85%COORDS: 12.42, 88.19
+ pone Lautaro Octavio Faure que seria yo y a la derecha de todo pone Prueba teecnica //Fanz que es la empresa que me esta haciendo la prueba tenica "
+    ,"timestamp,": "16:25:00","model":"github copilot-Claude"
+}
+43th prompt:
+{
+    "prompt":"vamos a hacer eso mas a refactorizar todo para entidades asi despues es mas facil aplicar otras cosas a parte por darte un ejemplo la funciond e que no este encima de otra es lo mismo si es silla o mesa una silla no puede estar sobre una mesa ni vicebersa ni eso entonces comencemos  Haciendo lsitado de funciones que deberia refactorizar "
+    ,"timestamp,": "16:30:00","model":"github copilot-Claude"
+}
+{"prompt":"Fase 1: refactorizar nomenclatura y flujo de seat-centric a entity-centric en Canvas, sin romper comportamiento actual.","timestamp":"16:35:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Fase 2: unificar creación/render/colisión por tipo de entidad (seat,row,table-circle,table-rect) con helpers genéricos y tipado fuerte.","timestamp":"16:40:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Fase 3: extraer dominio compartido a entities.ts (types, specs, helpers) y conectar imports en page y canvas.","timestamp":"16:45:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Fase 4: limpieza técnica completa: eliminar código muerto, props/estados sin uso y consolidar constantes/funciones duplicadas.","timestamp":"16:50:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Fase 5: optimizar performance con useMemo/useCallback y memo en componentes de UI para reducir renders innecesarios.","timestamp":"16:55:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Fase 6: ejecutar lint/build, corregir hallazgos y dejar el proyecto estable para QA.","timestamp":"17:00:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Fase 7: crear quality gate (npm run qa) y checklist de regresión funcional para validar cada cambio.","timestamp":"17:05:00","model":"github copilot-GPT-5.3-Codex"}
+propmt:
+{
+    "prompt":"
+Fase 8 — Creación de entidades (MVP funcional)
+Objetivo: crear seat, row, table-circle, table-rect, area-rect desde sidebar/canvas.
+Alcance:
+seat: click crea 1.
+row: click crea grupo lineal inicial (ej. 8 asientos).
+table-circle/table-rect: click crea mesa + asientos vinculados.
+area-rect: click+drag dibuja rectángulo con label por defecto.
+Done:
+todas crean correctamente;
+selección/drag/delete/undo-redo funcionan igual que seat;
+colisión respeta reglas base.
+Riesgo: relaciones padre-hijo mal definidas.
+Mitigación: incluir desde ya parentId y childrenIds.
+"
+    ,"timestamp,": "17:10:00","model":"github copilot-GPT-5.3-Codex"
+}
+propmt:
+{
+    "prompt":"cambiosi en creacion primero en fila que la fila sean todas sillas una al lado de la otra pero unidas por asi decirlo "
+    ,"timestamp,": "17:15:00","model":"github copilot-GPT-5.3-Codex"
+}
+{"prompt":"Ajustar menú de acciones rápidas de mesas para que se ancle siempre al costado derecho de la última silla derecha.","timestamp":"17:20:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Mostrar etiqueta de mesa arriba de la silla más alta (ej: Mesa 1), con buena legibilidad.","timestamp":"17:25:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Cambiar naming de creación de mesas: usar formato 'Mesa N' en lugar de 'TC+N'.","timestamp":"17:30:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Recalcular dimensiones base de mesa rectangular según sillas superiores/inferiores, pensando en futuras propiedades dinámicas.","timestamp":"17:35:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Corregir separación silla-mesa en mesa rectangular: evitar superposición en arriba/abajo/laterales.","timestamp":"17:40:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Fix rotación de mesa rectangular: al rotar, sillas deben mantener orientación y ubicación correctas.","timestamp":"17:45:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Ajustar orientación final de sillas por lado en mesa rectangular (derecha +90, izquierda -90, etc.) para consistencia visual.","timestamp":"17:50:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Fase 9 MVP: panel de propiedades contextual por tipo + edición masiva básica.","timestamp":"17:55:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Corregir cambio de color en propiedades para fila y ambas mesas (padre + hijos).","timestamp":"18:00:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Agregar edición de rotación en propiedades para fila y mesa rectangular con lógica equivalente a rotación grupal.","timestamp":"18:05:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Mesa rectangular en propiedades: etiqueta, X/Y, color (mesa+sillas), rotación conjunto, ancho/alto y layout por lado.","timestamp":"18:10:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Solucionar copiar/pegar de mesa rectangular respetando jerarquía y geometría.","timestamp":"18:15:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Fila en propiedades: etiqueta, X/Y, color conjunto, rotación, cantidad y separación de sillas.","timestamp":"18:20:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Mesa circular en propiedades: etiqueta, X/Y, color conjunto, cantidad de sillas y radio/distancia silla-mesa (sin rotación).","timestamp":"18:25:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Multiselección: mover X/Y, color y rotación compatible (excluir mesa circular) en una sola entrada de undo/redo.","timestamp":"18:30:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Agregar icono/handle visual para rotar al mantener y arrastrar en entidades compatibles.","timestamp":"18:35:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Agregar resize por arrastre para fila y mesas desde controles del canvas.","timestamp":"18:40:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Mostrar modal informativo al crear la primera área en canvas explicando Ctrl+Click para seleccionar elementos internos.","timestamp":"18:45:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"Área en propiedades: etiqueta, X/Y, color, ancho, alto y estilo visual de borde/opacidad.","timestamp":"18:50:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Área como sector: asociación automática por contención, selección de área + asociados, y recalculo consistente tras mover/editar.","timestamp":"19:05:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Agregar soporte de formas de área (rectángulo, círculo, cuadrado, triángulo) y edición vectorial con handles.","timestamp":"19:10:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Permitir resize de área por handle drag y agregar segundo handle en esquina superior izquierda.","timestamp":"19:15:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Evitar confusión de selección: ocultar overlays/labels de objetos internos cuando el área está seleccionada.","timestamp":"19:20:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] En áreas, quitar acciones rápidas no deseadas (rotar/espejar) y ajustar anclaje del menú para que no quede al centro.","timestamp":"19:25:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Habilitar selección de objetos internos con Ctrl/Cmd+Click priorizando hit-test de elementos internos sobre el área.","timestamp":"19:30:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Mejorar propiedades de área: estilo visual más prolijo para checkbox/select y opción de bloqueo de edición en canvas.","timestamp":"19:35:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Corregir color de área: que aplique a fondo + borde (no solo texto de etiqueta).","timestamp":"19:40:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Ajustar sidebar izquierda para que 'Silla' no parezca activa por defecto cuando no está seleccionada.","timestamp":"19:45:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Mejorar feedback de cursor: en select usar grab/grabbing durante manipulación (mover/rotar/resize).","timestamp":"19:50:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Iniciar bloque 2 de calidad: accesibilidad, performance y deuda técnica en Canvas (atajos, foco y consistencia de teclado).","timestamp":"20:00:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Mejorar accesibilidad de controles de Canvas: aria-labels, aria-pressed, role=toolbar y type=button en acciones rápidas y zoom/grid.","timestamp":"20:05:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Unificar Escape/teclado: cerrar edición vectorial, volver de selección interna al área, y limpiar selección/menú con comportamiento consistente.","timestamp":"20:10:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Evitar atajos globales cuando hay foco en input/textarea/select/contenteditable o modal abierto para no romper escritura/formularios.","timestamp":"20:12:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Corregir warning de React: 'useEffect final argument changed size between renders' estabilizando handlers globales y dependencias.","timestamp":"20:20:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Fix técnico post-refactor: sincronizar refs en useEffect (no durante render) para cumplir lint react-hooks/refs y mantener QA en verde.","timestamp":"20:25:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt":"[Sesión de hoy] Validar cierre del bloque con quality gate: npm run qa (eslint + build) pasando sin errores.","timestamp":"20:30:00","model":"github copilot-GPT-5.3-Codex"}
+{"prompt": "[02/03/2026 09:30] Conexión inicial a la base de datos (DB) y configuración de Prisma.", "timestamp": "09:30:00", "model": "github copilot-GPT-4.1"}
+{"prompt": "[02/03/2026 10:00] Creación de la página Home con estructura y estilos base.", "timestamp": "10:00:00", "model": "github copilot-GPT-4.1"}
+{"prompt": "[02/03/2026 10:30] Implementación de la página Sobre Proyecto y conexión con la DB.", "timestamp": "10:30:00", "model": "github copilot-GPT-4.1"}
+{"prompt": "[02/03/2026 11:00] Desarrollo de la página de Login y autenticación con NextAuth.", "timestamp": "11:00:00", "model": "github copilot-GPT-4.1"}
+{"prompt": "[02/03/2026 12:00] Creación de la página MyDashboards y lógica para crear nuevos dashboards.", "timestamp": "12:00:00", "model": "github copilot-GPT-4.1"}
+{"prompt": "[02/03/2026 13:00] Guardado de datos del canvas en la base de datos y en localStorage.", "timestamp": "13:00:00", "model": "github copilot-GPT-4.1"}
+{"prompt": "[02/03/2026 14:00] Adaptación y mejoras de la experiencia mobile para el canvas.", "timestamp": "14:00:00", "model": "github copilot-GPT-4.1"}
+{"propmt":" Verificaciones de que es el duseño del dashbaord asi no cauqlueira se puede meter", "timestamp": "14:30:00", "model": "github copilot-GPT-4.1"}
+{
+    "prompt": "Rotar los elementos usando la tecla R",
+    "timestamp": "16:45:00",
+    "model": "github copilot-GPT-5.3-Codex"
+}
+{
+    "prompt": "Mover los elementos con las teclas Flechas o awsd",
+    "timestamp": "16:46:00",
+    "model": "github copilot-GPT-5.3-Codex"
+}
+{
+    "prompt": "solucionar error de multiples acciones que no se veia cuando habia muchos elementos",
+    "timestamp": "16:47:00",
+    "model": "github copilot-GPT-5.3-Codex"
+}
+{
+    "prompt": "control: seleccionar una zona para seleccionar varios elementos a la vez evitando todos los elementos type area",
+    "timestamp": "16:48:00",
+    "model": "github copilot-GPT-5.3-Codex"
+}
+{
+    "prompt":"Realizar archivo para tutorial con sombreado y resaltar elemento del que sea hablando y que se pueda cerrar el tutorial o saltar pasos y que se adapte a mobile tambien"
+     ,
+    "timestamp":"16:50:00",
+    "model": "github copilot-GPT-5.3-Codex"
+}
+{
+    "prompt":"ahora hace que al abrir el tutorial por primera vez osea que no lo haya visto nunca aparezca automaticamente y que se pueda volver a abrir el tutorial desde algun lado por ejemplo en la parte de abajo del todo al lado de limpiar cache o algo asi que diga ver tutorial y que se pueda volver a abrir el tutorial"
+     ,
+    "timestamp":"16:55:00",
+    "model": "github copilot-GPT-5.3-Codex"
+}
+{
+    "prompt":"ahora hace una version movil mejorada para el tutorial y agrega shor keys para la version desktop",
+    "timestamp":"17:00:00",
+    "model": "github copilot-GPT-5.3-Codex"
+}
+{"prompt": "Toast de react-hot-toast al redirigir al login desde un link de invitación", "timestamp": "~14:00", "model": "Claude Sonnet 4.6"}
+{"prompt": "Agregar el toast de invitación en la página de auth", "timestamp": "~14:15", "model": "Claude Sonnet 4.6"}
+{"prompt": "Fix InviteModal: copiar link siempre disponible salvo max uses, revocar siempre, listado de usuarios que aceptaron", "timestamp": "~14:30", "model": "Claude Sonnet 4.6"}
+{"prompt": "Validar acceso al canvas por invitación (VIEWER/EDITOR) reemplazando modelo shares", "timestamp": "~15:00", "model": "Claude Sonnet 4.6"}
+{"prompt": "VIEWER solo puede usar el mouse arrastrar (H)", "timestamp": "~15:30", "model": "Claude Sonnet 4.6"}
+{"prompt": "Ocultar botón limpiar canvas para VIEWER", "timestamp": "~15:45", "model": "Claude Sonnet 4.6"}
+{"prompt": "Ocultar botón eliminar en Canvas para VIEWER via prop readOnly", "timestamp": "~16:00", "model": "Claude Sonnet 4.6"}
+{"prompt": "Fix: dashboard se quedaba validando permisos al navegar desde MyDashboards sin hacer F5", "timestamp": "~16:15", "model": "Claude Sonnet 4.6"}
+{"prompt": "Validar si ya es miembro al aceptar invitación: mismo rol mostrar aviso, rol distinto ofrecer cambio", "timestamp": "~16:30", "model": "Claude Sonnet 4.6"}
+{"prompt": "Confirmar que PATCH del canvas permite guardar a EDITOR", "timestamp": "~16:45", "model": "Claude Sonnet 4.6"}
+{"prompt": "Fix globals.css: sacar @import shadcn/tailwind.css que pisaba el tema de next-themes", "timestamp": "~17:00", "model": "Claude Sonnet 4.6"}
+{
+    "prompt": "Anda aplicando pagina por pagina el theme de next js aca te dejo el global css tambien .",
+    "timestamp": "~17:15",
+    "model": "Claude Sonnet 4.6"
+}
