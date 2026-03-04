@@ -10,8 +10,11 @@ import React, {
 import { motion } from "motion/react";
 import { AnimatePresence } from "motion/react";
 import { useParams } from "next/navigation";
-import Canvas from "./Canvas";
-import ConfirmModal from "./ConfirmModal";
+import dynamic from "next/dynamic";
+
+const Canvas = dynamic(() => import("./Canvas"), { ssr: false });
+const CanvasTutorial = dynamic(() => import("./CanvasTutorial"), { ssr: false });
+const ConfirmModal = dynamic(() => import("./ConfirmModal"), { ssr: false });
 import {
   ENTITY_GRID_SIZE,
   SIDEBAR_TOOL_CONFIG,
@@ -48,7 +51,7 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import CanvasTutorial from "./CanvasTutorial";
+
 
 type MouseMode = "select" | "pan";
 
@@ -1950,28 +1953,36 @@ export default function DashboardPage() {
   // --- Pantallas de control de acceso ---
   if (accessStatus === null) {
     return (
-      <div className="h-[calc(100dvh-4rem)] flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3 text-muted-foreground">
-          <svg
-            className="animate-spin"
-            width={28}
-            height={28}
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeDasharray="31.4"
-              strokeDashoffset="10"
-              strokeLinecap="round"
-            />
-          </svg>
-          <span className="text-sm font-medium">Verificando acceso...</span>
+      <div className="h-[calc(100dvh-4rem)] flex overflow-hidden bg-background">
+        {/* Sidebar izquierdo skeleton */}
+        <div className="w-14 shrink-0 border-r border-border bg-card flex flex-col items-center py-4 gap-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="w-8 h-8 rounded-lg bg-muted animate-pulse" style={{ animationDelay: `${i * 60}ms` }} />
+          ))}
         </div>
+        {/* Canvas skeleton */}
+        <div className="flex-1 relative bg-dot-pattern overflow-hidden">
+          {/* Grid lines simuladas */}
+          <div className="absolute inset-0 opacity-30"
+            style={{ backgroundImage: "linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)", backgroundSize: "40px 40px" }}
+          />
+          {/* Elementos simulados */}
+          <div className="absolute top-1/3 left-1/4 w-32 h-20 rounded-xl bg-muted/60 animate-pulse" />
+          <div className="absolute top-1/2 left-1/2 w-24 h-24 rounded-full bg-muted/50 animate-pulse" style={{ animationDelay: "120ms" }} />
+          <div className="absolute top-1/4 left-1/2 w-48 h-10 rounded-lg bg-muted/40 animate-pulse" style={{ animationDelay: "80ms" }} />
+          <div className="absolute bottom-1/3 left-1/3 w-20 h-20 rounded-full bg-muted/50 animate-pulse" style={{ animationDelay: "200ms" }} />
+          {/* Label de carga centrado */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2.5 bg-card/80 backdrop-blur-sm border border-border rounded-2xl px-6 py-4 shadow-lg">
+              <svg className="animate-spin text-primary" width={20} height={20} fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4" strokeDashoffset="10" strokeLinecap="round" />
+              </svg>
+              <span className="text-xs font-medium text-muted-foreground">Cargando canvas...</span>
+            </div>
+          </div>
+        </div>
+        {/* Sidebar derecho skeleton */}
+        <div className="w-10 shrink-0 border-l border-border bg-card" />
       </div>
     );
   }
