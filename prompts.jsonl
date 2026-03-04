@@ -346,3 +346,16 @@ propmt:
     "timestamp": "~17:15",
     "model": "Claude Sonnet 4.6"
 }
+
+{
+  "prompt": "¿No sería más fácil que, al editar el label en la barra lateral derecha, la etiqueta solo se actualice cuando se salga del input y no mientras se escribe? De esa manera, al terminar de escribir, valido que no esté vacío; si está vacío, dejo la etiqueta anterior. Así, siempre tendrán etiqueta, porque al crearse, pegarse o lo que sea, siempre tienen una, y si al editar no dejo que quede vacío, el problema está solucionado.",
+  "timestamp": "~17:20",
+  "model": "Claude Sonnet 4.6"
+}
+
+{
+  "prompt": "Cuando selecciono una mesa, tomo la mesa y sus sillas como un solo elemento porque así es mucho más fácil de trabajar, tanto para el usuario como para mí. Pero quizás deberíamos hacer que, en la barra lateral derecha, al seleccionar una mesa, se pueda cambiar la etiqueta de las sillas individuales de esa mesa.",
+  "timestamp": "~17:25",
+  "model": "Claude Sonnet 4.6"
+}
+

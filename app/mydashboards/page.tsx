@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import InviteModal from "./Invitemodal";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -243,7 +243,7 @@ const INITIAL_FORM: NewDashboardForm = {
   visibility: "PRIVATE",
 };
 
-export default function MyDashboardsPage() {
+function MyDashboardsPageContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -454,7 +454,6 @@ export default function MyDashboardsPage() {
 
       <main className="max-w-6xl mx-auto px-6 py-10 lg:py-14">
 
-        {/* ── Header ────────────────────────────────────────────────────────── */}
         <div className="mb-10 flex items-start justify-between gap-6">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">
@@ -484,7 +483,7 @@ export default function MyDashboardsPage() {
             {/* Nuevo */}
             <button
               onClick={openModal}
-              className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-px"
+              className="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-px"
             >
               <IconPlus />
               Nuevo dashboard
@@ -692,7 +691,7 @@ export default function MyDashboardsPage() {
                   {!selectMode && (
                     <button
                       onClick={() => router.push(`/${db.id}/dashboard/`)}
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-lg transition-colors shadow-sm"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-white px-3 py-1.5 rounded-lg transition-colors shadow-sm"
                     >
                       Abrir
                       <IconArrow />
@@ -1310,7 +1309,7 @@ export default function MyDashboardsPage() {
                 <button
                   disabled={!form.presetId}
                   onClick={goToStep2}
-                  className="inline-flex items-center gap-2 text-sm font-semibold bg-primary text-primary-foreground px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 text-sm font-semibold bg-primary text-white px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Continuar
                   <IconArrow size={13} />
@@ -1319,7 +1318,7 @@ export default function MyDashboardsPage() {
                 <button
                   disabled={creating}
                   onClick={handleCreate}
-                  className="inline-flex items-center gap-2 text-sm font-semibold bg-primary text-primary-foreground px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 text-sm font-semibold bg-primary text-white px-5 py-2.5 rounded-xl hover:bg-primary/90 transition-all shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {creating && <Spinner size="w-3.5 h-3.5" />}
                   {creating ? "Creando..." : "Crear dashboard"}
@@ -1330,5 +1329,12 @@ export default function MyDashboardsPage() {
         </div>
       )}
     </div>
+  );
+}
+export default function MyDashboardsPage() {
+  return (
+    <Suspense>
+      <MyDashboardsPageContent />
+    </Suspense>
   );
 }

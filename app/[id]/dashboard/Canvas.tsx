@@ -3640,7 +3640,7 @@ export default function Canvas({
           left: 16,
           zIndex: 30,
           background: "#2563eb",
-          color: "var(--card-foreground)",
+          color: "white",
           borderRadius: 8,
           padding: "6px 16px",
           fontSize: 13,
@@ -3753,7 +3753,7 @@ export default function Canvas({
             position: "absolute",
             left: 24,
             top: isCoarsePointerDevice ? 12 : 60,
-            zIndex: isCoarsePointerDevice ? 80 : 300,
+            zIndex: isCoarsePointerDevice ? 40 : 300,
             pointerEvents: "auto",
           }}
         >
@@ -4001,8 +4001,13 @@ export default function Canvas({
               const type = getEntityType(entity);
               const isEntityInsideSelectedArea =
                 type !== "area" &&
-                !!entity.areaId &&
-                selectedAreaIds.has(entity.areaId);
+                (
+                  (!!entity.areaId && selectedAreaIds.has(entity.areaId)) ||
+                  (!!entity.parentId && (() => {
+                    const parent = canvasEntities.find((e) => e.id === entity.parentId);
+                    return !!parent?.areaId && selectedAreaIds.has(parent.areaId);
+                  })())
+                );
               return (
                 (type === "table-circle" || type === "table-rect") &&
                 selectedCanvasEntityIds.includes(entity.id) &&
@@ -4137,8 +4142,15 @@ export default function Canvas({
             const isAreaEntity = entityType === "area";
             const isEntityInsideSelectedArea =
               !isAreaEntity &&
-              !!entity.areaId &&
-              selectedAreaIds.has(entity.areaId);
+              (
+                // El elemento mismo tiene areaId dentro de un área seleccionada
+                (!!entity.areaId && selectedAreaIds.has(entity.areaId)) ||
+                // El elemento es hijo (seat de fila/mesa) y su padre tiene areaId dentro de un área seleccionada
+                (!!entity.parentId && (() => {
+                  const parent = canvasEntities.find((e) => e.id === entity.parentId);
+                  return !!parent?.areaId && selectedAreaIds.has(parent.areaId);
+                })())
+              );
             const showSelectionDecoration =
               isSelected && !isEntityInsideSelectedArea;
             const areaShape = entity.areaShape ?? "rectangle";

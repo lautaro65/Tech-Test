@@ -68,6 +68,23 @@ const TIMELINE = [
     ],
     icon: Share2,
   },
+  {
+    day: "Día 5",
+    title: "UX, theming global y etiquetado avanzado",
+    description:
+      "Refiné la experiencia de usuario con foco en consistencia visual, corrección de errores UX detectados en uso real y la implementación completa del sistema de etiquetado.",
+    points: [
+      "Aplicación correcta del sistema de temas (claro/oscuro) en todas las páginas",
+      "Rediseño de la selección múltiple: agrupación de elementos por tipo en el sidebar",
+      "Scroll vertical en el panel de acciones grupales para evitar desbordamiento",
+      "Fix visual: al seleccionar un área, solo el área muestra borde de selección (sin ruido en los elementos internos)",
+      "Etiquetado en serie por tipo: prefijo e inicio independiente para cada tipo de elemento seleccionado",
+      "Sección 'Etiquetar por tipo' colapsable para mejor ergonomía visual",
+      "Edición de labels de sillas individuales directamente desde el panel de la mesa",
+      "Etiqueta obligatoria: el input de label aplica cambios al perder el foco y restaura el valor anterior si queda vacío",
+    ],
+    icon: Sparkles,
+  },
 ] as const;
 
 export default function SobreProyectoPage() {

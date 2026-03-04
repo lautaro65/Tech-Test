@@ -27,12 +27,8 @@ const getAllowedOriginHosts = () => {
     }
   };
 
-  addHost(process.env.NEXTAUTH_URL);
-  if (process.env.VERCEL_URL) {
-    addHost(`https://${process.env.VERCEL_URL}`);
-  }
+  addHost("https://tech-test-green-eight.vercel.app");
   addHost("http://localhost:3000");
-  addHost("http://127.0.0.1:3000");
 
   return hosts;
 };

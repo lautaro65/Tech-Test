@@ -213,12 +213,12 @@ function EntitySvgIcon({
 // Iconos inline para entidades
 function EntityIcon({ type }: { type: EntityType }) {
   return (
-   <EntitySvgIcon
-  type={type}
-  color="currentColor"
-  className="inline align-middle mr-1 text-primary"
-  size={32}
-/>
+    <EntitySvgIcon
+      type={type}
+      color="currentColor"
+      className="inline align-middle mr-1 text-primary"
+      size={32}
+    />
   );
 }
 
@@ -323,7 +323,7 @@ const GroupNumericActionRow = React.memo(function GroupNumericActionRow({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs font-medium min-w-[70px]">{label}</span>
+      <span className="text-xs font-medium overflow-y-auto min-w-[70px]">{label}</span>
       <input
         type="number"
         className="w-20 px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -517,7 +517,9 @@ export default function DashboardPage() {
     null | "granted" | "denied" | "not-found"
   >(null);
   // Rol del usuario en este dashboard (viene del API junto con accessStatus)
-  const [userRole, setUserRole] = useState<"OWNER" | "EDITOR" | "VIEWER" | null>(null);
+  const [userRole, setUserRole] = useState<
+    "OWNER" | "EDITOR" | "VIEWER" | null
+  >(null);
   const canEdit = userRole === "OWNER" || userRole === "EDITOR";
 
   // Cargar canvasData: SIEMPRE verifica acceso en la DB primero.
@@ -560,21 +562,21 @@ export default function DashboardPage() {
         setUserRole(role);
         // Viewers solo pueden arrastrar, no seleccionar
         if (role === "VIEWER") setMouseMode("pan");
-fetch("/api/user")
-  .then((r) => r.json())
-  .then((userData) => {
-    // Distinguir desktop vs mobile para saber si ya vio el tutorial correspondiente
-    const isMobileNow = window.matchMedia("(max-width: 767px)").matches;
-    const alreadySeen = isMobileNow
-      ? userData?.isViewTutorialMobile
-      : userData?.isViewTutorial;
-    if (!alreadySeen) {
-      setShowTutorial(true);
-    }
-  })
-  .catch(() => {
-    // Si falla, no bloqueamos la app — simplemente no mostramos el tutorial
-  });
+        fetch("/api/user")
+          .then((r) => r.json())
+          .then((userData) => {
+            // Distinguir desktop vs mobile para saber si ya vio el tutorial correspondiente
+            const isMobileNow = window.matchMedia("(max-width: 767px)").matches;
+            const alreadySeen = isMobileNow
+              ? userData?.isViewTutorialMobile
+              : userData?.isViewTutorial;
+            if (!alreadySeen) {
+              setShowTutorial(true);
+            }
+          })
+          .catch(() => {
+            // Si falla, no bloqueamos la app — simplemente no mostramos el tutorial
+          });
         // 1. Acceso confirmado → intentar restaurar draft local
         try {
           const raw = window.localStorage.getItem(storageKey);
@@ -639,11 +641,20 @@ fetch("/api/user")
 
   // Estado para abrir/cerrar el menú de acciones grupales
   const [groupMenuOpen, setGroupMenuOpen] = useState(true);
+  // Grupos abiertos/cerrados en la lista de entidades seleccionadas (por tipo)
+  const [openTypeGroups, setOpenTypeGroups] = useState<Record<string, boolean>>({});
   // Estados para inputs de acciones grupales
   const [groupMoveX, setGroupMoveX] = useState(0);
   const [groupMoveY, setGroupMoveY] = useState(0);
   const [groupRotate, setGroupRotate] = useState(0);
   const [groupColor, setGroupColor] = useState("#2563eb");
+  const [groupLabelPrefix, setGroupLabelPrefix] = useState("");
+  const [groupLabelStart, setGroupLabelStart] = useState(1);
+  // Etiquetado en serie por tipo: prefijo e inicio para cada tipo de entidad
+  const [typeLabelConfigs, setTypeLabelConfigs] = useState<
+    Record<string, { prefix: string; start: number }>
+  >({});
+  const [typeLabelSectionOpen, setTypeLabelSectionOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [confirmDeleteLabel, setConfirmDeleteLabel] = useState("esta entidad");
   const confirmDeleteActionRef = useRef<(() => void) | null>(null);
@@ -651,19 +662,19 @@ fetch("/api/user")
   const [isExporting, setIsExporting] = useState(false);
   const canvasExportRef = useRef<HTMLElement | null>(null);
   const exportMenuRef = useRef<HTMLDivElement | null>(null);
-const handleTutorialDone = useCallback(async () => {
-  setShowTutorial(false);
-  try {
-    const isMobileNow = window.matchMedia("(max-width: 767px)").matches;
-    await fetch("/api/user", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isMobile: isMobileNow }),
-    });
-  } catch {
-    // Ignorar: no es crítico si falla el marcado
-  }
-}, []);
+  const handleTutorialDone = useCallback(async () => {
+    setShowTutorial(false);
+    try {
+      const isMobileNow = window.matchMedia("(max-width: 767px)").matches;
+      await fetch("/api/user", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isMobile: isMobileNow }),
+      });
+    } catch {
+      // Ignorar: no es crítico si falla el marcado
+    }
+  }, []);
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -958,6 +969,64 @@ const handleTutorialDone = useCallback(async () => {
       doAction(nextEntities);
     }
   }, [doAction, entities, groupColor, selectedIdsWithRowChildren]);
+
+  const handleGroupLabel = useCallback(() => {
+    const prefix = groupLabelPrefix;
+    const start = Number(groupLabelStart);
+    if (!Number.isFinite(start)) return;
+
+    // Only label top-level selected entities (not child seats/chairs)
+    // so we don't overwrite "Mesa 1 - Silla 3" children accidentally.
+    // We work on direct selected entities only, ordered by their current label
+    // so the numbering is predictable.
+    const topLevelSelected = entities.filter(
+      (ent) => selectedIdsWithRowChildren.includes(ent.id) && !ent.parentId,
+    );
+    if (topLevelSelected.length === 0) return;
+
+    const nextEntities = entities.map((ent) => {
+      const idx = topLevelSelected.findIndex((t) => t.id === ent.id);
+      if (idx === -1) return ent;
+      const newLabel = `${prefix}${start + idx}`;
+      return { ...ent, label: newLabel };
+    });
+
+    doAction(nextEntities);
+  }, [
+    doAction,
+    entities,
+    groupLabelPrefix,
+    groupLabelStart,
+    selectedIdsWithRowChildren,
+  ]);
+
+  const handleGroupLabelByType = useCallback(
+    (typeKey: string) => {
+      const config = typeLabelConfigs[typeKey];
+      if (!config) return;
+      const prefix = config.prefix;
+      const start = Number(config.start);
+      if (!Number.isFinite(start)) return;
+
+      // Top-level selected entities of this specific type
+      const topLevelOfType = entities.filter(
+        (ent) =>
+          selectedIdsWithRowChildren.includes(ent.id) &&
+          !ent.parentId &&
+          getEntityType(ent) === typeKey,
+      );
+      if (topLevelOfType.length === 0) return;
+
+      const nextEntities = entities.map((ent) => {
+        const idx = topLevelOfType.findIndex((t) => t.id === ent.id);
+        if (idx === -1) return ent;
+        return { ...ent, label: `${prefix}${start + idx}` };
+      });
+
+      doAction(nextEntities);
+    },
+    [doAction, entities, typeLabelConfigs, selectedIdsWithRowChildren],
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1991,8 +2060,18 @@ const handleTutorialDone = useCallback(async () => {
           {!canEdit && userRole !== null && (
             <span className="inline-flex items-center gap-1.5 rounded-md bg-sky-50 border border-sky-200 px-2.5 py-1.5 text-xs font-semibold text-sky-700 select-none">
               <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" stroke="currentColor" strokeWidth="1.8"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8"/>
+                <path
+                  d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="3"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                />
               </svg>
               Solo lectura
             </span>
@@ -2000,68 +2079,68 @@ const handleTutorialDone = useCallback(async () => {
 
           {/* Guardar en DB — solo dueños y editores */}
           {canEdit && (
-          <button
-            type="button"
-            data-tutorial="save-button"
-            onClick={handleSaveToDb}
-            disabled={isSaving}
-            title={
-              hasUnsavedChanges
-                ? "Guardar cambios (Ctrl+S)"
-                : "Todo guardado (Ctrl+S)"
-            }
-            className="rounded-md bg-primary px-3 py-2 font-semibold text-primary-foreground inline-flex items-center gap-2 sm:px-4 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity relative"
-          >
-            {isSaving ? (
-              <svg
-                className="animate-spin"
-                width={16}
-                height={16}
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeDasharray="31.4"
-                  strokeDashoffset="10"
-                  strokeLinecap="round"
-                />
-              </svg>
-            ) : (
-              <Save size={16} />
-            )}
-            <span className="hidden sm:inline">
-              {isSaving ? "Guardando..." : "Guardar"}
-            </span>
-            {/* Punto indicador de cambios sin guardar */}
-            {hasUnsavedChanges && !isSaving && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-primary-foreground/20" />
-            )}
-          </button>
+            <button
+              type="button"
+              data-tutorial="save-button"
+              onClick={handleSaveToDb}
+              disabled={isSaving}
+              title={
+                hasUnsavedChanges
+                  ? "Guardar cambios (Ctrl+S)"
+                  : "Todo guardado (Ctrl+S)"
+              }
+              className="rounded-md bg-primary px-3 py-2 font-semibold text-white inline-flex items-center gap-2 sm:px-4 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity relative"
+            >
+              {isSaving ? (
+                <svg
+                  className="animate-spin"
+                  width={16}
+                  height={16}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeDasharray="31.4"
+                    strokeDashoffset="10"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              ) : (
+                <Save size={16} />
+              )}
+              <span className="hidden sm:inline">
+                {isSaving ? "Guardando..." : "Guardar"}
+              </span>
+              {/* Punto indicador de cambios sin guardar */}
+              {hasUnsavedChanges && !isSaving && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-primary-foreground/20" />
+              )}
+            </button>
           )}
 
           {/* Recargar desde DB — solo dueños y editores */}
           {canEdit && (
-          <button
-            type="button"
-            onClick={handleReloadFromDb}
-            title="Descartar cambios locales y recargar desde el servidor"
-            className="rounded-md border border-border bg-card px-3 py-2 font-semibold text-muted-foreground inline-flex items-center gap-2 sm:px-4 hover:bg-muted transition-colors"
-          >
-            <RefreshCcw size={16} />
-            <span className="hidden sm:inline">Recargar</span>
-          </button>
+            <button
+              type="button"
+              onClick={handleReloadFromDb}
+              title="Descartar cambios locales y recargar desde el servidor"
+              className="rounded-md border border-border bg-card px-3 py-2 font-semibold text-muted-foreground inline-flex items-center gap-2 sm:px-4 hover:bg-muted transition-colors"
+            >
+              <RefreshCcw size={16} />
+              <span className="hidden sm:inline">Recargar</span>
+            </button>
           )}
 
           <div className="relative" ref={exportMenuRef}>
             <button
               type="button"
               onClick={() => setExportMenuOpen((prev) => !prev)}
-              className="rounded-md bg-primary px-3 py-2 font-semibold text-primary-foreground inline-flex items-center gap-2 sm:px-4"
+              className="rounded-md bg-primary px-3 py-2 font-semibold text-white inline-flex items-center gap-2 sm:px-4"
             >
               <Download size={16} />
               <span className="hidden sm:inline">Export</span>
@@ -2101,7 +2180,7 @@ const handleTutorialDone = useCallback(async () => {
         </div>
         {/* Sidebar */}
         <aside
-        data-tutorial="sidebar-tools"
+          data-tutorial="sidebar-tools"
           className={`bg-card/80 border-r border-border flex max-h-full min-h-0 flex-col py-4 gap-4 sm:py-6 sm:gap-6 overflow-y-auto overflow-x-hidden overscroll-contain transition-all duration-300 ${
             isSidebarCollapsed
               ? isMobileViewport
@@ -2148,30 +2227,33 @@ const handleTutorialDone = useCallback(async () => {
                 : "items-stretch px-2 sm:px-3"
             }`}
           >
-            {canEdit && SIDEBAR_TOOL_CONFIG.map((toolConfig) => (
-              <SidebarToolItem
-                key={toolConfig.type}
-                collapsed={isSidebarCollapsed}
-                label={toolConfig.label}
-                tooltip={toolConfig.tooltip}
-                type={toolConfig.type}
-                highlighted={toolConfig.highlighted}
-                active={Boolean(
-                  toolConfig.selectable && sidebarTool === toolConfig.type,
-                )}
-                onClick={
-                  toolConfig.selectable
-                    ? () => handleSidebarToolToggle(toolConfig.type)
-                    : undefined
-                }
-              />
-            ))}
+            {canEdit &&
+              SIDEBAR_TOOL_CONFIG.map((toolConfig) => (
+                <SidebarToolItem
+                  key={toolConfig.type}
+                  collapsed={isSidebarCollapsed}
+                  label={toolConfig.label}
+                  tooltip={toolConfig.tooltip}
+                  type={toolConfig.type}
+                  highlighted={toolConfig.highlighted}
+                  active={Boolean(
+                    toolConfig.selectable && sidebarTool === toolConfig.type,
+                  )}
+                  onClick={
+                    toolConfig.selectable
+                      ? () => handleSidebarToolToggle(toolConfig.type)
+                      : undefined
+                  }
+                />
+              ))}
 
             {isMobileViewport && (
               <>
                 <div className="my-1 h-px w-8 bg-border/80" />
 
-                {MOUSE_MODE_OPTIONS.filter(o => canEdit || o.mode === "pan").map((option) => (
+                {MOUSE_MODE_OPTIONS.filter(
+                  (o) => canEdit || o.mode === "pan",
+                ).map((option) => (
                   <button
                     key={`mobile-mode-${option.mode}`}
                     type="button"
@@ -2247,7 +2329,7 @@ const handleTutorialDone = useCallback(async () => {
 
         {/* Main Content Area */}
         <section
-        data-tutorial="canvas-area"
+          data-tutorial="canvas-area"
           ref={canvasExportRef}
           className="flex-1 min-h-0 flex flex-col items-center justify-center relative bg-dot-pattern overflow-hidden"
         >
@@ -2277,23 +2359,25 @@ const handleTutorialDone = useCallback(async () => {
             data-export-ignore="true"
             className="absolute bottom-4 left-1/2 z-20 hidden max-w-[calc(100%-1rem)] -translate-x-1/2 items-center gap-2 overflow-visible rounded-full border border-border bg-card/80 px-3 py-2 shadow sm:bottom-6 sm:max-w-none sm:gap-4 sm:px-4 md:flex"
           >
-            {MOUSE_MODE_OPTIONS.filter(o => canEdit || o.mode === "pan").map((option) => (
-              <div data-tutorial={`mouse-mode-${option.mode}`} key={option.mode} >
-
-
-              <MouseModeOption
-                key={option.mode}
-                active={mouseMode === option.mode}
-                onClick={() => setMouseMode(option.mode)}
-                icon={option.icon}
-                label={option.label}
-                shortcutKeys={option.shortcutKeys}
-                activeClass={option.activeClass}
-                inactiveClass={option.inactiveClass}
-              />
-              </div>
-
-            ))}
+            {MOUSE_MODE_OPTIONS.filter((o) => canEdit || o.mode === "pan").map(
+              (option) => (
+                <div
+                  data-tutorial={`mouse-mode-${option.mode}`}
+                  key={option.mode}
+                >
+                  <MouseModeOption
+                    key={option.mode}
+                    active={mouseMode === option.mode}
+                    onClick={() => setMouseMode(option.mode)}
+                    icon={option.icon}
+                    label={option.label}
+                    shortcutKeys={option.shortcutKeys}
+                    activeClass={option.activeClass}
+                    inactiveClass={option.inactiveClass}
+                  />
+                </div>
+              ),
+            )}
           </div>
         </section>
 
@@ -2301,7 +2385,7 @@ const handleTutorialDone = useCallback(async () => {
         <AnimatePresence>
           {propertiesOpen ? (
             <motion.aside
-             data-tutorial="properties-panel"
+              data-tutorial="properties-panel"
               key="properties-panel"
               initial={{ clipPath: "inset(0 -100% 0 100%)" }}
               animate={{ clipPath: "inset(0 0% 0 0%)" }}
@@ -2309,15 +2393,14 @@ const handleTutorialDone = useCallback(async () => {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className={`bg-card border border-border flex flex-col ${
                 isMobileViewport
-                  ? "fixed inset-x-2 bottom-2 top-16 z-40 rounded-2xl"
-                  : "w-80 min-w-[320px]"
+                  ? "fixed inset-x-2 bottom-2  top-16 z-40 rounded-2xl"
+                  : "w-80  min-w-[400px]"
               }`}
               style={
                 isMobileViewport
                   ? {
                       boxShadow:
-                        "0 8px 32px 0 color-mix(in oklch, var(--primary) 10%, transparent), 0 1.5px 8px 0 rgba(0,0,0,0.04)"
-,
+                        "0 8px 32px 0 color-mix(in oklch, var(--primary) 10%, transparent), 0 1.5px 8px 0 rgba(0,0,0,0.04)",
                       background: "var(--card, #fff)",
                     }
                   : {
@@ -2325,8 +2408,7 @@ const handleTutorialDone = useCallback(async () => {
                       maxHeight: "900px",
                       borderRadius: "28px",
                       boxShadow:
-                        "0 8px 32px 0 color-mix(in oklch, var(--primary) 10%, transparent), 0 1.5px 8px 0 rgba(0,0,0,0.04)"
-,
+                        "0 8px 32px 0 color-mix(in oklch, var(--primary) 10%, transparent), 0 1.5px 8px 0 rgba(0,0,0,0.04)",
                       position: "absolute",
                       top: "5vh",
                       right: "32px",
@@ -2367,8 +2449,13 @@ const handleTutorialDone = useCallback(async () => {
                   ×
                 </button>
               </div>
-              {/* Selección actual y acciones grupales sticky arriba */}
-              <div className="px-6 pt-2 pb-0 flex flex-col gap-2" style={{background: "var(--card, #fff)", zIndex: 20}}>
+              {/* Contenido scrollable único — selección, acciones grupales y lista */}
+              <div className="flex-1 overflow-y-auto flex flex-col gap-2 pb-6">
+              {/* Selección actual y acciones grupales */}
+              <div
+                className="px-6 pt-2 pb-0 flex flex-col gap-2"
+                style={{ background: "var(--card, #fff)", zIndex: 20 }}
+              >
                 <motion.div
                   layout
                   initial={{ opacity: 0, y: -8 }}
@@ -2410,7 +2497,10 @@ const handleTutorialDone = useCallback(async () => {
                         stiffness: 300,
                         damping: 28,
                       }}
-                      style={{ overflow: "hidden", background: "var(--card, #fff)" }}
+                      style={{
+                        overflow: "hidden",
+                        background: "var(--card, #fff)",
+                      }}
                       className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 mb-2 flex flex-col gap-2"
                     >
                       <div
@@ -2458,62 +2548,421 @@ const handleTutorialDone = useCallback(async () => {
                               damping: 28,
                             }}
                             style={{ overflow: "hidden" }}
-                            className="flex flex-col gap-3 mt-1"
+                            className="flex flex-col gap-3 mt-1 "
                           >
-                            <GroupNumericActionRow
-                              label="Mover X"
-                              value={groupMoveX}
-                              onChange={setGroupMoveX}
-                              onApply={handleGroupMoveX}
-                              placeholder="Ej: 100"
-                            />
-                            <GroupNumericActionRow
-                              label="Mover Y"
-                              value={groupMoveY}
-                              onChange={setGroupMoveY}
-                              onApply={handleGroupMoveY}
-                              placeholder="Ej: 100"
-                            />
-                            <GroupNumericActionRow
-                              label="Rotar"
-                              value={groupRotate}
-                              onChange={setGroupRotate}
-                              onApply={handleGroupRotate}
-                              placeholder="Ej: 15"
-                            />
-                            {/* Color */}
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium min-w-[70px]">
-                                Color
-                              </span>
-                              <input
-                                type="color"
-                                className="w-8 h-8 rounded-full border-2 border-border shadow-sm cursor-pointer transition hover:scale-105 focus:ring-2 focus:ring-primary/30"
-                                value={groupColor}
-                                onChange={(e) => setGroupColor(e.target.value)}
+                            <div
+                              className="flex flex-col gap-3"
+                            >
+                              <GroupNumericActionRow
+                                label="Mover X"
+                                value={groupMoveX}
+                                onChange={setGroupMoveX}
+                                onApply={handleGroupMoveX}
+                                placeholder="Ej: 100"
                               />
-                              <button
-                                className="px-2 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/80 transition flex items-center"
-                                title="Aplicar"
-                                onClick={handleGroupColor}
-                                type="button"
-                              >
-                                <svg
-                                  width="16"
-                                  height="16"
-                                  fill="none"
-                                  viewBox="0 0 16 16"
+                              <GroupNumericActionRow
+                                label="Mover Y"
+                                value={groupMoveY}
+                                onChange={setGroupMoveY}
+                                onApply={handleGroupMoveY}
+                                placeholder="Ej: 100"
+                              />
+                              <GroupNumericActionRow
+                                label="Rotar"
+                                value={groupRotate}
+                                onChange={setGroupRotate}
+                                onApply={handleGroupRotate}
+                                placeholder="Ej: 15"
+                              />
+                              {/* Color */}
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium min-w-[70px]">
+                                  Color
+                                </span>
+                                <input
+                                  type="color"
+                                  className="w-8 h-8 rounded-full border-2 border-border shadow-sm cursor-pointer transition hover:scale-105 focus:ring-2 focus:ring-primary/30"
+                                  value={groupColor}
+                                  onChange={(e) =>
+                                    setGroupColor(e.target.value)
+                                  }
+                                />
+                                <button
+                                  className="px-2 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/80 transition flex items-center"
+                                  title="Aplicar"
+                                  onClick={handleGroupColor}
+                                  type="button"
                                 >
-                                  <path
-                                    d="M3 8h10M11 5l2 3-2 3"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              </button>
+                                  <svg
+                                    width="16"
+                                    height="16"
+                                    fill="none"
+                                    viewBox="0 0 16 16"
+                                  >
+                                    <path
+                                      d="M3 8h10M11 5l2 3-2 3"
+                                      stroke="currentColor"
+                                      strokeWidth="1.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+
+                              {/* ── Etiquetado en serie ─────────────────── */}
+                              <div className="flex flex-col gap-1.5 pt-2 border-t border-border/40">
+                                <span className="text-xs font-semibold text-primary uppercase tracking-wide flex items-center gap-1">
+                                  <svg
+                                    width="13"
+                                    height="13"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+                                      stroke="currentColor"
+                                      strokeWidth="1.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                    <circle
+                                      cx="7"
+                                      cy="7"
+                                      r="1.5"
+                                      fill="currentColor"
+                                    />
+                                  </svg>
+                                  Etiquetar en serie
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                  <div className="flex flex-col gap-0.5 flex-1">
+                                    <span className="text-[10px] text-muted-foreground font-medium">
+                                      Prefijo
+                                    </span>
+                                    <input
+                                      type="text"
+                                      className="w-full px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                      placeholder="Ej: A-"
+                                      value={groupLabelPrefix}
+                                      onChange={(e) =>
+                                        setGroupLabelPrefix(e.target.value)
+                                      }
+                                      maxLength={12}
+                                    />
+                                  </div>
+                                  <div className="flex flex-col gap-0.5 w-14">
+                                    <span className="text-[10px] text-muted-foreground font-medium">
+                                      Inicio
+                                    </span>
+                                    <input
+                                      type="number"
+                                      className="w-full px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 text-center"
+                                      value={groupLabelStart}
+                                      onChange={(e) =>
+                                        setGroupLabelStart(
+                                          Number(e.target.value),
+                                        )
+                                      }
+                                      min={0}
+                                      step={1}
+                                    />
+                                  </div>
+                                  <div className="flex flex-col gap-0.5">
+                                    <span className="text-[10px] text-transparent select-none">
+                                      ·
+                                    </span>
+                                    <button
+                                      className="px-2 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/80 transition flex items-center"
+                                      title="Aplicar etiquetado en serie"
+                                      onClick={handleGroupLabel}
+                                      type="button"
+                                    >
+                                      <svg
+                                        width="16"
+                                        height="16"
+                                        fill="none"
+                                        viewBox="0 0 16 16"
+                                      >
+                                        <path
+                                          d="M3 8h10M11 5l2 3-2 3"
+                                          stroke="currentColor"
+                                          strokeWidth="1.5"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                                {/* Preview de cómo quedarán las etiquetas */}
+                                <p className="text-[10px] text-muted-foreground leading-snug">
+                                  {groupLabelPrefix !== "" ||
+                                  groupLabelStart !== 1 ? (
+                                    <>
+                                      Vista previa:{" "}
+                                      <span className="font-semibold text-foreground">
+                                        {groupLabelPrefix}
+                                        {groupLabelStart}
+                                      </span>
+                                      ,{" "}
+                                      <span className="font-semibold text-foreground">
+                                        {groupLabelPrefix}
+                                        {groupLabelStart + 1}
+                                      </span>
+                                      ,{" "}
+                                      <span className="font-semibold text-foreground">
+                                        {groupLabelPrefix}
+                                        {groupLabelStart + 2}
+                                      </span>
+                                      …
+                                    </>
+                                  ) : (
+                                    "Ingresá un prefijo y/o número de inicio."
+                                  )}
+                                </p>
+                              </div>
+
+                              {/* ── Etiquetado en serie por tipo ─────────── */}
+                              {(() => {
+                                const TYPE_LABELS: Record<string, string> = {
+                                  seat: "Silla suelta",
+                                  row: "Fila",
+                                  "table-circle": "Mesa circular",
+                                  "table-rect": "Mesa rectangular",
+                                  area: "Área",
+                                };
+                                const topLevelSelected = entities.filter(
+                                  (ent) =>
+                                    selectedIdsWithRowChildren.includes(
+                                      ent.id,
+                                    ) && !ent.parentId,
+                                );
+                                const typesPresent = Array.from(
+                                  new Set(
+                                    topLevelSelected.map((ent) =>
+                                      getEntityType(ent),
+                                    ),
+                                  ),
+                                );
+                                if (typesPresent.length < 2) return null;
+                                return (
+                                  <div className="flex flex-col gap-1 pt-2 border-t border-border/40">
+                                    {/* Header toggle */}
+                                    <div
+                                      className="flex items-center gap-2 cursor-pointer select-none"
+                                      onClick={() =>
+                                        setTypeLabelSectionOpen((v) => !v)
+                                      }
+                                    >
+                                      <motion.span
+                                        animate={{
+                                          rotate: typeLabelSectionOpen
+                                            ? 180
+                                            : 0,
+                                        }}
+                                        className={
+                                          "w-5 h-5 flex items-center justify-center rounded transition " +
+                                          (typeLabelSectionOpen
+                                            ? "bg-primary/10 text-primary"
+                                            : "bg-muted text-muted-foreground hover:bg-primary/10")
+                                        }
+                                      >
+                                        <svg
+                                          width="14"
+                                          height="14"
+                                          viewBox="0 0 20 20"
+                                          fill="none"
+                                        >
+                                          <path
+                                            d="M6 8l4 4 4-4"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          />
+                                        </svg>
+                                      </motion.span>
+                                      <span className="text-xs font-semibold text-primary uppercase tracking-wide flex items-center gap-1">
+                                        <svg
+                                          width="13"
+                                          height="13"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
+                                            stroke="currentColor"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                          />
+                                          <circle
+                                            cx="7"
+                                            cy="7"
+                                            r="1.5"
+                                            fill="currentColor"
+                                          />
+                                        </svg>
+                                        Etiquetar por tipo
+                                      </span>
+                                    </div>
+                                    <AnimatePresence>
+                                      {typeLabelSectionOpen && (
+                                        <motion.div
+                                          initial={{ opacity: 0, height: 0 }}
+                                          animate={{
+                                            opacity: 1,
+                                            height: "auto",
+                                          }}
+                                          exit={{ opacity: 0, height: 0 }}
+                                          transition={{
+                                            type: "spring",
+                                            stiffness: 300,
+                                            damping: 28,
+                                          }}
+                                          style={{ overflow: "hidden" }}
+                                          className="flex flex-col gap-2 mt-1"
+                                        >
+                                          <p className="text-[10px] text-muted-foreground">
+                                            Asigná una serie independiente para
+                                            cada tipo de elemento seleccionado.
+                                          </p>
+                                          {typesPresent.map((typeKey) => {
+                                            const count =
+                                              topLevelSelected.filter(
+                                                (ent) =>
+                                                  getEntityType(ent) ===
+                                                  typeKey,
+                                              ).length;
+                                            const cfg = typeLabelConfigs[
+                                              typeKey
+                                            ] ?? { prefix: "", start: 1 };
+                                            return (
+                                              <div
+                                                key={typeKey}
+                                                className="flex flex-col gap-1 rounded-md border border-border/60 bg-background/60 px-2 py-1.5"
+                                              >
+                                                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
+                                                  {TYPE_LABELS[typeKey] ??
+                                                    typeKey}{" "}
+                                                  <span className="text-primary font-bold">
+                                                    ({count})
+                                                  </span>
+                                                </span>
+                                                <div className="flex items-center gap-1.5">
+                                                  <div className="flex flex-col gap-0.5 flex-1">
+                                                    <span className="text-[10px] text-muted-foreground font-medium">
+                                                      Prefijo
+                                                    </span>
+                                                    <input
+                                                      type="text"
+                                                      className="w-full px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                                      placeholder="Ej: M-"
+                                                      value={cfg.prefix}
+                                                      onChange={(e) =>
+                                                        setTypeLabelConfigs(
+                                                          (prev) => ({
+                                                            ...prev,
+                                                            [typeKey]: {
+                                                              ...cfg,
+                                                              prefix:
+                                                                e.target.value,
+                                                            },
+                                                          }),
+                                                        )
+                                                      }
+                                                      maxLength={12}
+                                                    />
+                                                  </div>
+                                                  <div className="flex flex-col gap-0.5 w-14">
+                                                    <span className="text-[10px] text-muted-foreground font-medium">
+                                                      Inicio
+                                                    </span>
+                                                    <input
+                                                      type="number"
+                                                      className="w-full px-2 py-1 rounded-md border border-border bg-background text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 text-center"
+                                                      value={cfg.start}
+                                                      onChange={(e) =>
+                                                        setTypeLabelConfigs(
+                                                          (prev) => ({
+                                                            ...prev,
+                                                            [typeKey]: {
+                                                              ...cfg,
+                                                              start: Number(
+                                                                e.target.value,
+                                                              ),
+                                                            },
+                                                          }),
+                                                        )
+                                                      }
+                                                      min={0}
+                                                      step={1}
+                                                    />
+                                                  </div>
+                                                  <div className="flex flex-col gap-0.5">
+                                                    <span className="text-[10px] text-transparent select-none">
+                                                      ·
+                                                    </span>
+                                                    <button
+                                                      className="px-2 py-1 rounded-md bg-primary text-primary-foreground hover:bg-primary/80 transition flex items-center"
+                                                      title={`Aplicar etiquetado en serie a ${TYPE_LABELS[typeKey] ?? typeKey}`}
+                                                      onClick={() =>
+                                                        handleGroupLabelByType(
+                                                          typeKey,
+                                                        )
+                                                      }
+                                                      type="button"
+                                                    >
+                                                      <svg
+                                                        width="16"
+                                                        height="16"
+                                                        fill="none"
+                                                        viewBox="0 0 16 16"
+                                                      >
+                                                        <path
+                                                          d="M3 8h10M11 5l2 3-2 3"
+                                                          stroke="currentColor"
+                                                          strokeWidth="1.5"
+                                                          strokeLinecap="round"
+                                                          strokeLinejoin="round"
+                                                        />
+                                                      </svg>
+                                                    </button>
+                                                  </div>
+                                                </div>
+                                                {(cfg.prefix !== "" ||
+                                                  cfg.start !== 1) && (
+                                                  <p className="text-[10px] text-muted-foreground">
+                                                    Vista previa:{" "}
+                                                    <span className="font-semibold text-foreground">
+                                                      {cfg.prefix}
+                                                      {cfg.start}
+                                                    </span>
+                                                    ,{" "}
+                                                    <span className="font-semibold text-foreground">
+                                                      {cfg.prefix}
+                                                      {cfg.start + 1}
+                                                    </span>
+                                                    ,{" "}
+                                                    <span className="font-semibold text-foreground">
+                                                      {cfg.prefix}
+                                                      {cfg.start + 2}
+                                                    </span>
+                                                    …
+                                                  </p>
+                                                )}
+                                              </div>
+                                            );
+                                          })}
+                                        </motion.div>
+                                      )}
+                                    </AnimatePresence>
+                                  </div>
+                                );
+                              })()}
                             </div>
+                            {/* fin scroll container */}
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -2521,45 +2970,125 @@ const handleTutorialDone = useCallback(async () => {
                   )}
                 </AnimatePresence>
               </div>
-              {/* Lista de entidades seleccionadas scrollable */}
+              {/* Lista de entidades seleccionadas — agrupada por tipo */}
               {selectedEntities.length > 0 && (
-                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2 flex flex-col gap-3">
-                  {selectedEntities.map((ent, i) => (
-                    <motion.div
-                      key={ent.id || i}
-                      transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 28,
-                        delay: i * 0.04,
-                      }}
-                      className="relative group"
-                    >
-                      <div className="relative pr-8">{/* Extra padding for chevron */}
-                        <EntityDropdown
-                          ent={ent}
-                          onUpdate={handleUpdateEntity}
-                          onDelete={handleDeleteEntity}
-                        />
-                        {selectedEntities.length > 1 && (
+  <div className="px-6 pt-2 flex flex-col gap-2">
+                  {(() => {
+                    const TYPE_META: Record<string, { label: string; labelPlural: string }> = {
+                      seat:          { label: "Silla suelta",       labelPlural: "Sillas sueltas"       },
+                      row:           { label: "Fila",               labelPlural: "Filas"                },
+                      "table-circle":{ label: "Mesa circular",      labelPlural: "Mesas circulares"     },
+                      "table-rect":  { label: "Mesa rectangular",   labelPlural: "Mesas rectangulares"  },
+                      area:          { label: "Área",               labelPlural: "Áreas"                },
+                    };
+                    // Agrupar por tipo manteniendo el orden original
+                    const groups: { typeKey: string; entities: typeof selectedEntities }[] = [];
+                    const seen = new Set<string>();
+                    selectedEntities.forEach((ent) => {
+                      const t = getEntityType(ent);
+                      if (!seen.has(t)) { seen.add(t); groups.push({ typeKey: t, entities: [] }); }
+                      groups.find((g) => g.typeKey === t)!.entities.push(ent);
+                    });
+
+                    // Si solo hay un tipo, mostrar directo sin agrupar
+                    if (groups.length === 1) {
+                      return groups[0].entities.map((ent, i) => (
+                        <motion.div
+                          key={ent.id || i}
+                          transition={{ type: "spring", stiffness: 300, damping: 28, delay: i * 0.04 }}
+                          className="relative group"
+                        >
+                          <div className="relative pr-8">
+                            <EntityDropdown ent={ent} onUpdate={handleUpdateEntity} onDelete={handleDeleteEntity} allEntities={entities} />
+                            {selectedEntities.length > 1 && (
+                              <button
+                                type="button"
+                                className="absolute top-2 right-2 z-10 opacity-60 hover:opacity-100 transition-opacity bg-destructive/10 text-destructive rounded-full p-1 group-hover:opacity-100"
+                                title="Quitar de la selección"
+                                onClick={() => setSelectedEntityIds((prev) => prev.filter((id) => id !== ent.id))}
+                              >
+                                <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                                  <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                </svg>
+                              </button>
+                            )}
+                          </div>
+                        </motion.div>
+                      ));
+                    }
+
+                    // Múltiples tipos → mostrar acordeones por tipo
+                    return groups.map(({ typeKey, entities: groupEnts }) => {
+                      const meta = TYPE_META[typeKey] ?? { label: typeKey, labelPlural: typeKey };
+                      const isOpen = openTypeGroups[typeKey] !== false; // abierto por defecto
+                      const toggle = () => setOpenTypeGroups((prev) => ({ ...prev, [typeKey]: !isOpen }));
+                      return (
+                        <div key={typeKey} className="flex flex-col rounded-lg border border-border/60 overflow-hidden">
+                          {/* Header del grupo */}
                           <button
                             type="button"
-                            className="absolute top-2 right-2 z-10 opacity-60 hover:opacity-100 transition-opacity bg-destructive/10 text-destructive rounded-full p-1 group-hover:opacity-100"
-                            title="Quitar de la selección"
-                            onClick={() => {
-                              setSelectedEntityIds((prev) => prev.filter((id) => id !== ent.id));
-                            }}
+                            onClick={toggle}
+                            className="flex items-center gap-2 px-3 py-2 bg-muted/50 hover:bg-muted transition-colors text-left w-full"
                           >
-                            <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                              <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
+                            <motion.span
+                              animate={{ rotate: isOpen ? 180 : 0 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+                              className="w-4 h-4 flex items-center justify-center text-muted-foreground shrink-0"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+                                <path d="M6 8l4 4 4-4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </motion.span>
+                            <EntitySvgIcon type={typeKey as EntityType} size={16} color="currentColor" className="text-primary shrink-0" />
+                            <span className="text-xs font-semibold text-foreground flex-1">
+                              {groupEnts.length === 1 ? meta.label : meta.labelPlural}
+                            </span>
+                            <span className="text-[10px] font-bold text-primary bg-primary/10 rounded-full px-2 py-0.5 shrink-0">
+                              {groupEnts.length}
+                            </span>
                           </button>
-                        )}
-                      </div>
-                    </motion.div>
-                  ))}
+                          {/* Contenido colapsable */}
+                          <AnimatePresence>
+                            {isOpen && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 28 }}
+                                style={{ overflow: "hidden" }}
+                                className="flex flex-col gap-2 px-2 py-2"
+                              >
+                                {groupEnts.map((ent, i) => (
+                                  <motion.div
+                                    key={ent.id || i}
+                                    transition={{ type: "spring", stiffness: 300, damping: 28, delay: i * 0.03 }}
+                                    className="relative group"
+                                  >
+                                    <div className="relative pr-8">
+                                      <EntityDropdown ent={ent} onUpdate={handleUpdateEntity} onDelete={handleDeleteEntity} allEntities={entities} />
+                                      <button
+                                        type="button"
+                                        className="absolute top-2 right-2 z-10 opacity-60 hover:opacity-100 transition-opacity bg-destructive/10 text-destructive rounded-full p-1 group-hover:opacity-100"
+                                        title="Quitar de la selección"
+                                        onClick={() => setSelectedEntityIds((prev) => prev.filter((id) => id !== ent.id))}
+                                      >
+                                        <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                                          <path d="M6 6l8 8M14 6l-8 8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               )}
+              </div>{/* fin scroll único */}
             </motion.aside>
           ) : (
             // Botón flotante para abrir el panel
@@ -2571,10 +3100,11 @@ const handleTutorialDone = useCallback(async () => {
                 bottom: isMobileViewport ? 16 : "auto",
                 right: isMobileViewport ? 16 : 36,
                 zIndex: 41,
-              background: "var(--card)",
-  border: "1.5px solid var(--border)",
-  boxShadow: "0 4px 16px color-mix(in oklch, var(--primary) 10%, transparent)",
-  
+                background: "var(--card)",
+                border: "1.5px solid var(--border)",
+                boxShadow:
+                  "0 4px 16px color-mix(in oklch, var(--primary) 10%, transparent)",
+
                 borderRadius: 18,
                 width: isMobileViewport ? 44 : 48,
                 height: isMobileViewport ? 44 : 48,
@@ -2605,8 +3135,12 @@ const handleTutorialDone = useCallback(async () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />
-      {showTutorial && <CanvasTutorial onDone={handleTutorialDone} isMobile={isMobileViewport} />}
-
+      {showTutorial && (
+        <CanvasTutorial
+          onDone={handleTutorialDone}
+          isMobile={isMobileViewport}
+        />
+      )}
     </div>
   );
 }
@@ -2616,17 +3150,30 @@ const EntityDropdown = React.memo(function EntityDropdown({
   ent,
   onUpdate,
   onDelete,
+  allEntities = [],
 }: {
   ent: Entity;
   onUpdate: (id: string, updates: EntityUpdate) => void;
   onDelete: (id: string) => void;
+  allEntities?: Entity[];
 }) {
   const [open, setOpen] = React.useState(false);
   const entityType: EntityType = ent.type ?? "seat";
 
   // Handlers para actualizar el estado global
-  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    onUpdate(ent.id, { label: e.target.value });
+  const [localLabel, setLocalLabel] = React.useState(ent.label ?? "");
+  React.useEffect(() => {
+    setLocalLabel(ent.label ?? "");
+  }, [ent.label]);
+  const handleLabelBlur = () => {
+    const trimmed = localLabel.trim();
+    if (trimmed === "") {
+      // Vacío: restaurar el label anterior
+      setLocalLabel(ent.label ?? "");
+    } else {
+      onUpdate(ent.id, { label: trimmed });
+    }
+  };
   const handleXChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     onUpdate(ent.id, { x: Number(e.target.value) });
   const handleYChange = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -2848,6 +3395,25 @@ const EntityDropdown = React.memo(function EntityDropdown({
   const isRow = entityType === "row";
   const isCircleTable = entityType === "table-circle";
   const isRectTable = entityType === "table-rect";
+
+  // Sillas hijas de esta mesa
+  const childSeats = React.useMemo(
+    () =>
+      isCircleTable || isRectTable
+        ? allEntities.filter((e) => e.parentId === ent.id)
+        : [],
+    [allEntities, ent.id, isCircleTable, isRectTable],
+  );
+  const [seatsOpen, setSeatsOpen] = React.useState(false);
+  // Labels locales para las sillas hijas (para edición onBlur)
+  const [seatLocalLabels, setSeatLocalLabels] = React.useState<
+    Record<string, string>
+  >(() => Object.fromEntries(childSeats.map((s) => [s.id, s.label ?? ""])));
+  React.useEffect(() => {
+    setSeatLocalLabels(
+      Object.fromEntries(childSeats.map((s) => [s.id, s.label ?? ""])),
+    );
+  }, [childSeats]);
   const areaShape: AreaShape = ent.areaShape ?? "rectangle";
   const areaLocked = Boolean(ent.areaLocked);
   const areaWidth =
@@ -2972,7 +3538,7 @@ const EntityDropdown = React.memo(function EntityDropdown({
     <motion.div
       layout
       className={
-        "rounded-xl border border-border bg-card/90 px-4 py-2 flex flex-col gap-2 transition hover:bg-muted/60 relative " +
+        "rounded-xl border border-border overflow-auto bg-card/90 px-4 py-2 flex flex-col gap-2 transition hover:bg-muted/60 relative " +
         (open ? "ring-2 ring-primary/40" : "cursor-pointer")
       }
       onClick={() => !open && setOpen(true)}
@@ -2991,7 +3557,11 @@ const EntityDropdown = React.memo(function EntityDropdown({
         <div className="flex-1 flex flex-col min-w-0">
           <span
             className="text-xs font-semibold text-foreground break-words leading-snug max-h-[2.5em] overflow-hidden"
-            style={{ wordBreak: 'break-word', whiteSpace: 'normal', display: 'block' }}
+            style={{
+              wordBreak: "break-word",
+              whiteSpace: "normal",
+              display: "block",
+            }}
           >
             {ent.label || ent.id || "Sin ID"}
           </span>
@@ -3030,8 +3600,12 @@ const EntityDropdown = React.memo(function EntityDropdown({
               <input
                 type="text"
                 className="w-full px-2 py-1.5 rounded-md border border-border bg-card text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition placeholder:text-muted-foreground"
-                value={ent.label}
-                onChange={handleLabelChange}
+                value={localLabel}
+                onChange={(e) => setLocalLabel(e.target.value)}
+                onBlur={handleLabelBlur}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") e.currentTarget.blur();
+                }}
                 placeholder="Ej: A-12"
                 required
                 maxLength={24}
@@ -3375,6 +3949,91 @@ const EntityDropdown = React.memo(function EntityDropdown({
                 </div>
               </div>
             )}
+            {/* ── Etiquetas de sillas de la mesa ─────── */}
+            {(isCircleTable || isRectTable) && childSeats.length > 0 && (
+              <div className="flex flex-col gap-1 pt-2 border-t border-border/40">
+                <div
+                  className="flex items-center gap-2 cursor-pointer select-none"
+                  onClick={() => setSeatsOpen((v) => !v)}
+                >
+                  <motion.span
+                    animate={{ rotate: seatsOpen ? 180 : 0 }}
+                    className={
+                      "w-5 h-5 flex items-center justify-center rounded transition " +
+                      (seatsOpen
+                        ? "bg-primary/10 text-primary"
+                        : "bg-muted text-muted-foreground hover:bg-primary/10")
+                    }
+                  >
+                    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+                      <path
+                        d="M6 8l4 4 4-4"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </motion.span>
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wide flex items-center gap-1">
+                    <Tag size={13} className="text-primary" />
+                    Sillas ({childSeats.length})
+                  </span>
+                </div>
+                <AnimatePresence>
+                  {seatsOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 28,
+                      }}
+                      style={{ overflow: "hidden" }}
+                      className="flex flex-col gap-1.5 mt-1"
+                    >
+                      {childSeats.map((seat, idx) => (
+                        <div key={seat.id} className="flex items-center gap-2">
+                          <span className="text-[10px] text-muted-foreground font-medium w-5 text-right shrink-0">
+                            {idx + 1}.
+                          </span>
+                          <input
+                            type="text"
+                            className="flex-1 px-2 py-1 rounded-md border border-border bg-background text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+                            value={seatLocalLabels[seat.id] ?? seat.label ?? ""}
+                            onChange={(e) =>
+                              setSeatLocalLabels((prev) => ({
+                                ...prev,
+                                [seat.id]: e.target.value,
+                              }))
+                            }
+                            onBlur={() => {
+                              const trimmed = (
+                                seatLocalLabels[seat.id] ?? ""
+                              ).trim();
+                              if (trimmed === "") {
+                                setSeatLocalLabels((prev) => ({
+                                  ...prev,
+                                  [seat.id]: seat.label ?? "",
+                                }));
+                              } else {
+                                onUpdate(seat.id, { label: trimmed });
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") e.currentTarget.blur();
+                            }}
+                            maxLength={32}
+                          />
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
             {/* Color picker mejorado */}
             <div className="flex items-center gap-3 mt-1">
               <Palette size={16} className="text-primary" />
@@ -3398,47 +4057,49 @@ const EntityDropdown = React.memo(function EntityDropdown({
               </span>
             </div>
             {/* Eliminar botón mejorado */}
-            <div className="flex justify-end gap-2 mt-2">
-              {isSeat && (
-                <button
-                  className="px-3 py-1.5 rounded-md border border-border bg-transparent text-foreground font-semibold flex items-center gap-2 transition hover:bg-muted/70 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/20 text-xs"
-                  onClick={handleResetSeatDefaults}
-                  type="button"
-                  title="Restablecer valores por defecto de la silla"
-                >
-                  <RotateCcw size={16} /> Restablecer silla
-                </button>
-              )}
-              {isRow && (
-                <button
-                  className="px-3 py-1.5 rounded-md border border-border bg-transparent text-foreground font-semibold flex items-center gap-2 transition hover:bg-muted/70 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/20 text-xs"
-                  onClick={handleResetRowDefaults}
-                  type="button"
-                  title="Restablecer valores por defecto de la fila"
-                >
-                  <RotateCcw size={16} /> Restablecer fila
-                </button>
-              )}
-              {isCircleTable && (
-                <button
-                  className="px-3 py-1.5 rounded-md border border-border bg-transparent text-foreground font-semibold flex items-center gap-2 transition hover:bg-muted/70 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/20 text-xs"
-                  onClick={handleResetCircleTableDefaults}
-                  type="button"
-                  title="Restablecer valores por defecto de la mesa circular"
-                >
-                  <RotateCcw size={16} /> Restablecer mesa circular
-                </button>
-              )}
-              {isRectTable && (
-                <button
-                  className="px-3 py-1.5 rounded-md border border-border bg-transparent text-foreground font-semibold flex items-center gap-2 transition hover:bg-muted/70 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/20 text-xs"
-                  onClick={handleResetRectTableDefaults}
-                  type="button"
-                  title="Restablecer valores por defecto de la mesa rectangular"
-                >
-                  <RotateCcw size={16} /> Restablecer mesa rectangular
-                </button>
-              )}
+            <div className="flex flex-col items-end gap-2 mt-2">
+              <div className="flex gap-2">
+                {isSeat && (
+                  <button
+                    className="px-3 py-1.5 rounded-md border border-border bg-transparent text-foreground font-semibold flex items-center gap-2 transition hover:bg-muted/70 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/20 text-xs"
+                    onClick={handleResetSeatDefaults}
+                    type="button"
+                    title="Restablecer valores por defecto de la silla"
+                  >
+                    <RotateCcw size={16} /> Restablecer silla
+                  </button>
+                )}
+                {isRow && (
+                  <button
+                    className="px-3 py-1.5 rounded-md border border-border bg-transparent text-foreground font-semibold flex items-center gap-2 transition hover:bg-muted/70 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/20 text-xs"
+                    onClick={handleResetRowDefaults}
+                    type="button"
+                    title="Restablecer valores por defecto de la fila"
+                  >
+                    <RotateCcw size={16} /> Restablecer fila
+                  </button>
+                )}
+                {isCircleTable && (
+                  <button
+                    className="px-3 py-1.5 rounded-md border border-border bg-transparent text-foreground font-semibold flex items-center gap-2 transition hover:bg-muted/70 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/20 text-xs"
+                    onClick={handleResetCircleTableDefaults}
+                    type="button"
+                    title="Restablecer valores por defecto de la mesa circular"
+                  >
+                    <RotateCcw size={16} /> Restablecer mesa circular
+                  </button>
+                )}
+                {isRectTable && (
+                  <button
+                    className="px-3 py-1.5 rounded-md border border-border bg-transparent text-foreground font-semibold flex items-center gap-2 transition hover:bg-muted/70 hover:shadow focus:outline-none focus:ring-2 focus:ring-primary/20 text-xs"
+                    onClick={handleResetRectTableDefaults}
+                    type="button"
+                    title="Restablecer valores por defecto de la mesa rectangular"
+                  >
+                    <RotateCcw size={16} /> Restablecer mesa rectangular
+                  </button>
+                )}
+              </div>
               <button
                 className="px-3 py-1.5 rounded-md border border-destructive bg-transparent text-destructive font-semibold flex items-center gap-2 transition hover:bg-destructive/10 hover:shadow focus:outline-none focus:ring-2 focus:ring-destructive/30 text-xs"
                 onClick={() => onDelete(ent.id)}
@@ -3449,7 +4110,6 @@ const EntityDropdown = React.memo(function EntityDropdown({
             </div>
           </motion.div>
         )}
-
       </AnimatePresence>
     </motion.div>
   );
