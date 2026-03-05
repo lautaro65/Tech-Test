@@ -161,8 +161,15 @@ export default function InviteModal({
       });
       const data = await res.json();
       if (data.token) {
+        // Usar el dominio actual, y fallback al dominio de Vercel si no está disponible
+        let baseUrl = "";
+        if (typeof window !== "undefined" && window.location.origin) {
+          baseUrl = window.location.origin;
+        } else {
+          baseUrl = "https://tech-test-green-eight.vercel.app";
+        }
         setNewLink(
-          `${window.location.origin}/mydashboards?dashboardId=${dashboardId}&invite=${data.token}`,
+          `${baseUrl}/mydashboards?dashboardId=${dashboardId}&invite=${data.token}`
         );
         setEmail("");
         fetchInvites();

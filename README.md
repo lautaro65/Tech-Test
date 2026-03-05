@@ -12,20 +12,12 @@
    npm install
    ```
 3. **Configurar variables de entorno:**
-   -.env.local:
+   -.env.local:Y completar con los datos que pase por gmail.
 
-
-
--.env 4. **Configurar la base de datos:** - Asegúrate de tener una instancia de PostgreSQL disponible. - Ejecuta las migraciones Prisma:
-`bash
-	  npx prisma migrate deploy
-	  ` - (Opcional) Para desarrollo local, puedes usar:
-`bash
-	npx prisma generate
-	` 6. **Iniciar la aplicación en desarrollo:**
+-.env 4. **Iniciar proyecto:** -
 `bash
 	npm run dev
-	` 7. **Build de producción:**
+
 ---
 
 ## Decisiones Técnicas Relevantes
