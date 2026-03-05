@@ -1,4 +1,4 @@
-# EstadioX Tech Test
+# Tech Test FANZ
 
 ## Instrucciones de Setup
 
@@ -21,19 +21,11 @@
 	  npx prisma migrate deploy
 	  ` - (Opcional) Para desarrollo local, puedes usar:
 `bash
-	  npx prisma db push
-	  ` 5. **Generar el cliente Prisma:**
-`bash
 	npx prisma generate
 	` 6. **Iniciar la aplicación en desarrollo:**
 `bash
 	npm run dev
 	` 7. **Build de producción:**
-`bash
-	npm run build
-	npm start
-	`
-
 ---
 
 ## Decisiones Técnicas Relevantes
@@ -72,7 +64,7 @@
 - Solo usuarios autenticados pueden crear y editar dashboards.
 - El OWNER puede invitar y revocar acceso a otros usuarios.
 - El estado del canvas es un array de entidades serializado en JSON (`canvasData`).
-- Los VIEWER solo pueden ver y mover el canvas, no editar entidades.
+- Los VIEWER solo pueden ver, no editar entidades.
 - El sistema de roles es estricto y validado en cada endpoint.
 - El frontend asume que la API responde con los datos y permisos correctos.
 - El sistema de invitaciones es por token único y expira tras su uso o revocación.
